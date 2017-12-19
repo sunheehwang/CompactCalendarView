@@ -43,7 +43,7 @@ public class CompactCalendarTab extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View v = inflater.inflate(R.layout.main_tab,container,false);
+        View v = inflater.inflate(R.layout.main_tab, container, false);
 
         final List<String> mutableBookings = new ArrayList<>();
 
@@ -54,6 +54,8 @@ public class CompactCalendarTab extends Fragment {
         final Button showCalendarWithAnimationBut = (Button) v.findViewById(R.id.show_with_animation_calendar);
         final Button setLocaleBut = (Button) v.findViewById(R.id.set_locale);
         final Button removeAllEventsBut = (Button) v.findViewById(R.id.remove_all_events);
+        final Button changeViewModeBut = (Button) v.findViewById(R.id.change_view_mode);
+
 
         final ArrayAdapter adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_list_item_1, mutableBookings);
         bookingsListView.setAdapter(adapter);
@@ -64,7 +66,7 @@ public class CompactCalendarTab extends Fragment {
         // below allows you to configure colors for the current day the user has selected
         // compactCalendarView.setCurrentSelectedDayBackgroundColor(getResources().getColor(R.color.dark_red));
         compactCalendarView.setUseThreeLetterAbbreviation(false);
-        compactCalendarView.setFirstDayOfWeek(Calendar.MONDAY);
+        compactCalendarView.setFirstDayOfWeek(Calendar.SUNDAY);
 
         loadEvents();
         loadEventsForYear(2017);
@@ -110,19 +112,33 @@ public class CompactCalendarTab extends Fragment {
             public void onMonthScroll(Date firstDayOfNewMonth) {
                 toolbar.setTitle(dateFormatForMonth.format(firstDayOfNewMonth));
             }
+
+            @Override
+            public void onWeekScroll(Date firstDayOfNewWeek) {
+                Log.d("test", "firstDayOfNewWeek=" + firstDayOfNewWeek);
+                toolbar.setTitle(dateFormatForMonth.format(firstDayOfNewWeek));
+            }
         });
 
         showPreviousMonthBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                compactCalendarView.showPreviousMonth();
+                if (compactCalendarView.isWeekViewEnabled()) {
+                    compactCalendarView.showPreviousWeek();
+                } else {
+                    compactCalendarView.showPreviousMonth();
+                }
             }
         });
 
         showNextMonthBut.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                compactCalendarView.showNextMonth();
+                if (compactCalendarView.isWeekViewEnabled()) {
+                    compactCalendarView.showNextWeek();
+                } else {
+                    compactCalendarView.showNextMonth();
+                }
             }
         });
 
@@ -166,6 +182,12 @@ public class CompactCalendarTab extends Fragment {
             }
         });
 
+        changeViewModeBut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                compactCalendarView.setWeekViewEnabled(!compactCalendarView.isWeekViewEnabled());
+            }
+        });
 
         // uncomment below to show indicators above small indicator events
         // compactCalendarView.shouldDrawIndicatorsBelowSelectedDays(true);
@@ -211,7 +233,7 @@ public class CompactCalendarTab extends Fragment {
     }
 
     private void openCalendarOnCreate(View v) {
-        final RelativeLayout layout = (RelativeLayout)v.findViewById(R.id.main_content);
+        final RelativeLayout layout = (RelativeLayout) v.findViewById(R.id.main_content);
         ViewTreeObserver vto = layout.getViewTreeObserver();
         vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -283,13 +305,13 @@ public class CompactCalendarTab extends Fragment {
     private List<Event> getEvents(long timeInMillis, int day) {
         if (day < 2) {
             return Arrays.asList(new Event(Color.argb(255, 169, 68, 65), timeInMillis, "Event at " + new Date(timeInMillis)));
-        } else if ( day > 2 && day <= 4) {
+        } else if (day > 2 && day <= 4) {
             return Arrays.asList(
                     new Event(Color.argb(255, 169, 68, 65), timeInMillis, "Event at " + new Date(timeInMillis)),
                     new Event(Color.argb(255, 100, 68, 65), timeInMillis, "Event 2 at " + new Date(timeInMillis)));
         } else {
             return Arrays.asList(
-                    new Event(Color.argb(255, 169, 68, 65), timeInMillis, "Event at " + new Date(timeInMillis) ),
+                    new Event(Color.argb(255, 169, 68, 65), timeInMillis, "Event at " + new Date(timeInMillis)),
                     new Event(Color.argb(255, 100, 68, 65), timeInMillis, "Event 2 at " + new Date(timeInMillis)),
                     new Event(Color.argb(255, 70, 68, 65), timeInMillis, "Event 3 at " + new Date(timeInMillis)));
         }
