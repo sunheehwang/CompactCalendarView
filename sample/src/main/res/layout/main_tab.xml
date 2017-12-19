@@ -60,6 +60,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/remove_all_events" />
+
+
     </LinearLayout>
 
     <LinearLayout
@@ -84,9 +86,16 @@
             />
     </LinearLayout>
 
+    <Button
+        android:id="@+id/change_view_mode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/calendar_control_buttons_2"
+        android:text="Change ViewMode (Weekly or Monthly)" />
+
     <ListView
         android:id="@+id/bookings_listview"
-        android:layout_below="@+id/calendar_control_buttons_2"
+        android:layout_below="@+id/change_view_mode"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
     </ListView>

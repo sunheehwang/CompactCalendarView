@@ -121,6 +121,7 @@ public class CompactCalendarControllerTest {
         assertEquals(new Date(1420070400000L), actualDate);
     }
 
+
     @Test
     public void testItSetsDayColumns(){
         //simulate Feb month

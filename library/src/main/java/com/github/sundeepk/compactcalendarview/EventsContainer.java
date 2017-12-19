@@ -1,5 +1,6 @@
 package com.github.sundeepk.compactcalendarview;
 
+
 import com.github.sundeepk.compactcalendarview.comparators.EventComparator;
 import com.github.sundeepk.compactcalendarview.domain.Event;
 
@@ -17,9 +18,11 @@ public class EventsContainer {
     private Map<String, List<Events>> eventsByMonthAndYearMap = new HashMap<>();
     private Comparator<Event> eventsComparator = new EventComparator();
     private Calendar eventsCalendar;
+    private Calendar calendar;
 
     public EventsContainer(Calendar eventsCalendar) {
         this.eventsCalendar = eventsCalendar;
+        this.calendar = Calendar.getInstance();
     }
 
     void addEvent(Event event) {
@@ -63,6 +66,64 @@ public class EventsContainer {
     List<Events> getEventsForMonthAndYear(int month, int year){
         return eventsByMonthAndYearMap.get(year + "_" + month);
     }
+
+    List<Events> getEventsForMonthAndYearAndWeekOfYear(Calendar selectedCalendar, int firstDayOfWeek){
+
+        int year = selectedCalendar.get(Calendar.YEAR);
+        int month = selectedCalendar.get(Calendar.MONTH);
+        int day = selectedCalendar.get(Calendar.DAY_OF_MONTH);
+        int dayOfWeek = selectedCalendar.get(Calendar.DAY_OF_WEEK);
+        int maxOfMonth = selectedCalendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+        int weekOfYear = selectedCalendar.get(Calendar.WEEK_OF_YEAR);
+        int firstDay = day - (dayOfWeek - firstDayOfWeek);
+        int diff = maxOfMonth - firstDayOfWeek;
+
+        List<Events> eventsList = eventsByMonthAndYearMap.get(year + "_" + month);
+        if (eventsList == null) {
+            eventsList = new ArrayList<>();
+        } else {
+            eventsList = new ArrayList<>(eventsList);
+        }
+
+        if (firstDay < 0) {
+            // previous week
+            int previousYear = (month == 1)? year - 1: year;
+            int previousMonth = (month == 1)? 12: month -1;
+
+            List<Events> previousEventsList = eventsByMonthAndYearMap.get(previousYear + "_" + previousMonth);
+            if (previousEventsList != null) {
+                eventsList.addAll(0, previousEventsList);
+            }
+        } else if (diff > 7) {
+            // next week
+            int nextYear = (month == 12)? year + 1: year;
+            int nextMonth = (month == 12)? 1: month +1;
+
+            List<Events> nextEventsList = eventsByMonthAndYearMap.get(nextYear + "_" + nextMonth);
+            if (nextEventsList != null) {
+                eventsList.addAll(0, nextEventsList);
+            }
+        }
+
+
+        int fromIndex = -1;
+        int toIndex = -1;
+        int size = eventsList == null ? 0: eventsList.size();
+        for (int i = 0; i < size; i++) {
+            Events events = eventsList.get(i);
+            calendar.setTimeInMillis(events.getTimeInMillis());
+            if (weekOfYear == calendar.get(Calendar.WEEK_OF_YEAR)) {
+                if (fromIndex == -1) {
+                    fromIndex = i;
+                    toIndex = i;
+                } else {
+                    toIndex = i;
+                }
+            }
+        }
+        return (fromIndex == -1)? Collections.<Events>emptyList(): eventsList.subList(fromIndex, toIndex+1);
+    }
+
 
     List<Event> getEventsForMonth(long eventTimeInMillis){
         eventsCalendar.setTimeInMillis(eventTimeInMillis);

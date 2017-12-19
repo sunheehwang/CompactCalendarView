@@ -2,11 +2,13 @@ package com.github.sundeepk.compactcalendarview;
 
 
 import android.animation.Animator;
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.support.annotation.NonNull;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
+import android.view.animation.Transformation;
 
 class AnimationHandler {
 
@@ -54,6 +56,35 @@ class AnimationHandler {
         compactCalendarView.getLayoutParams().height = compactCalendarView.getHeight();
         compactCalendarView.requestLayout();
         compactCalendarView.startAnimation(heightAnim);
+    }
+
+    void changeViewMode() {
+        if (isAnimating) {
+            return;
+        }
+        isAnimating = true;
+
+        int toHeight = compactCalendarController.getTargetHeight();
+        if (compactCalendarController.isWeekViewEnabled()) {
+            toHeight = compactCalendarController.getHeight();
+        }
+
+        ValueAnimator animator = ValueAnimator.ofInt(compactCalendarView.getLayoutParams().height, toHeight);
+        animator.setDuration(HEIGHT_ANIM_DURATION_MILLIS);
+        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                compactCalendarView.getLayoutParams().height = (Integer) animation.getAnimatedValue();
+                compactCalendarView.invalidate();
+                compactCalendarView.requestLayout();
+                isAnimating = false;
+            }
+        });
+
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.play(animator);
+        animatorSet.setInterpolator(new AccelerateDecelerateInterpolator());
+        animatorSet.start();
     }
 
     void openCalendarWithAnimation() {
