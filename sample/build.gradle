@@ -3,16 +3,15 @@ buildscript {
         jcenter()
         mavenLocal()
         mavenCentral()
-    }
+		google()
+	}
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.2.0'
-        classpath 'com.facebook.testing.screenshot:plugin:0.4.3'
+        classpath 'com.android.tools.build:gradle:3.4.0'
     }
 }
 
 apply plugin: 'com.android.application'
-apply plugin: 'com.facebook.testing.screenshot'
 
 android {
     compileSdkVersion 24
